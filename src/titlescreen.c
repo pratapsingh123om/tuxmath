@@ -35,6 +35,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "setup.h"
 #include "menu.h"
 
+#include <stdlib.h>
+#include <time.h>
+
 /* --- Data Structure for Dirty Blitting --- */
 SDL_Rect srcupdate[MAX_UPDATES];
 SDL_Rect dstupdate[MAX_UPDATES];
@@ -132,6 +135,8 @@ void update_screen(int* frame);
 void add_rect(SDL_Rect* src, SDL_Rect* dst);
 
 int handle_easter_egg(const SDL_Event* evt);
+
+void GenerateFractionQuestion(char* question, char* answer);
 
 
 
@@ -1129,4 +1134,33 @@ int handle_easter_egg(const SDL_Event* evt)
 
         return 0;
     }
+}
+
+void GenerateFractionQuestion(char* question, char* answer) {
+    int numerator1 = rand() % 10 + 1; // Random numerator for fraction 1
+    int denominator1 = rand() % 9 + 1; // Random denominator for fraction 1
+    int numerator2 = rand() % 10 + 1; // Random numerator for fraction 2
+    int denominator2 = rand() % 9 + 1; // Random denominator for fraction 2
+    char operation = (rand() % 2 == 0) ? '+' : '-'; // Random operation (+ or -)
+
+    // Construct the question string
+    sprintf(question, "%d/%d %c %d/%d", numerator1, denominator1, operation, numerator2, denominator2);
+
+    // Calculate the answer
+    int result_numerator, result_denominator;
+    if (operation == '+') {
+        result_numerator = numerator1 * denominator2 + numerator2 * denominator1;
+        result_denominator = denominator1 * denominator2;
+    } else {
+        result_numerator = numerator1 * denominator2 - numerator2 * denominator1;
+        result_denominator = denominator1 * denominator2;
+    }
+
+    // Simplify the fraction (optional)
+    int gcd = abs(__gcd(result_numerator, result_denominator));
+    result_numerator /= gcd;
+    result_denominator /= gcd;
+
+    // Construct the answer string
+    sprintf(answer, "%d/%d", result_numerator, result_denominator);
 }

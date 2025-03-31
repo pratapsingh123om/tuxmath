@@ -34,6 +34,7 @@ typedef enum _MC_Operation {
     MC_OPER_SUB,
     MC_OPER_MULT,
     MC_OPER_DIV,
+    MC_OPER_FRACTION, // New operation for fractions
     MC_NUM_OPERS
 } MC_Operation;
 
@@ -299,6 +300,12 @@ int MC_MakeFlashcard(char* buf, MC_FlashCard* fc);
 /* Reorganize formula_string and answer_string to render the same equation
    in a different format */
 void reformat_arithmetic(MC_FlashCard* card, MC_Format f);
+
+/* Generate a fractional question and answer */
+int MC_GenerateFractionQuestion(MC_FlashCard* card);
+
+/* Function to generate fractional questions */
+void generate_fraction_question(MC_MathGame* game);
 
 #endif
 

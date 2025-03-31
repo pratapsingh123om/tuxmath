@@ -1,3 +1,4 @@
+
 /* factoroids.c
 
    The main game loop for a factoring game resembling the
@@ -310,8 +311,8 @@ void fractions(void)
     quit = 0;
     tux_img = IMG_TUX_CONSOLE1;
 
-    DEBUGMSG(debug_factoroids, "Entering factors():\n");
-    /*****Initalizing the Factor activiy *****/
+    DEBUGMSG(debug_factoroids, "Entering fractions():\n");
+    /*****Initalizing the Fraction activity *****/
     FF_game = FRACTIONS_GAME;
 
     if (!FF_init())
@@ -341,6 +342,7 @@ void fractions(void)
         FF_handle_ship();
         FF_handle_asteroids();
         FF_handle_answer();
+
         factoroids_draw(asteroid, &tuxship, laser, bonus, bonus_time, digits, wave, score, num, tux_img, button_pressed);
         SDL_Flip(screen);
 
@@ -642,25 +644,33 @@ static void FF_handle_asteroids(void){
 
 static void FF_handle_answer(void)
 {
+    // Parse the entered number or fraction
+    char input[10];
+    snprintf(input, sizeof(input), "%d", num);
 
-    num = (digits[0] * 100 +
-            digits[1] * 10 +
-            digits[2]);
-    /* negative answer support DSB */
-    if (neg_answer_picked)
+    if (strchr(input, '/')) // Check if input contains a fraction
     {
-        num = -num;
+        int numerator, denominator;
+        if (sscanf(input, "%d/%d", &numerator, &denominator) == 2 && denominator != 0)
+        {
+            if (is_simplified(numerator, denominator))
+            {
+                num = numerator; // Store numerator for validation
+                doing_answer = 1;
+            }
+        }
     }
-
-    if (!doing_answer)
+    else
     {
-        return;
+        num = (digits[0] * 100 + digits[1] * 10 + digits[2]);
+        if (neg_answer_picked)
+        {
+            num = -num;
+        }
+        doing_answer = 1;
     }
-
-    doing_answer = 0;
 
     neg_answer_picked = 0;
-
 }
 
 
@@ -1010,18 +1020,32 @@ int fast_sin(int angle)
 /*** fact_number generator by aviraldg ***/
 
 static int generatenumber(int wave) {
-    if(wave > PRIME_MAX_LIMIT) wave = PRIME_MAX_LIMIT;
-    int n=1, i;
-    for(i=0; i<wave; i++)
-        n *= pow(prime_numbers[i], rand()%prime_power_limit[i]);
-    /* If we somehow got a bogus number, try again: */
-    if(validate_number(n, wave))
-        return n;
+    if (FF_game == FRACTIONS_GAME)
+    {
+        int numerator = rand() % (10 + wave * 2) + 1;
+        int denominator = rand() % (10 + wave * 2) + 1;
+        while (!is_simplified(numerator, denominator))
+        {
+            numerator = rand() % (10 + wave * 2) + 1;
+            denominator = rand() % (10 + wave * 2) + 1;
+        }
+        return numerator * 1000 + denominator; // Combine numerator and denominator
+    }
     else
     {
-        if (n > 1)  /* 1 can be generated without bugs and is innocuous */
-            DEBUGMSG(debug_factoroids, "generatenumber() - wrn - invalid number: %d\n", n);
-        return generatenumber(wave);
+        if(wave > PRIME_MAX_LIMIT) wave = PRIME_MAX_LIMIT;
+        int n=1, i;
+        for(i=0; i<wave; i++)
+            n *= pow(prime_numbers[i], rand()%prime_power_limit[i]);
+        /* If we somehow got a bogus number, try again: */
+        if(validate_number(n, wave))
+            return n;
+        else
+        {
+            if (n > 1)  /* 1 can be generated without bugs and is innocuous */
+                DEBUGMSG(debug_factoroids, "generatenumber() - wrn - invalid number: %d\n", n);
+            return generatenumber(wave);
+        }
     }
 }
 
@@ -1031,22 +1055,31 @@ static int generatenumber(int wave) {
 /*** Returns 0 (false) if number is invalid.    DSB             */
 static int validate_number(int num, int wave)
 {
-    int i = 0;
-    if(num < 2)
-        return 0;
-    if(wave > PRIME_MAX_LIMIT)
-        wave = PRIME_MAX_LIMIT;
-    for(i = 0; i < wave; i++)
+    if (FF_game == FRACTIONS_GAME)
     {
-        while(num % prime_numbers[i] == 0)
-            num /= prime_numbers[i];
+        int numerator = num / 1000; // Extract numerator
+        int denominator = num % 1000; // Extract denominator
+        return is_simplified(numerator, denominator);
     }
-
-    /* If we aren't left with 1, the number is invalid: */
-    if(num == 1)
-        return 1;
     else
-        return 0;
+    {
+        int i = 0;
+        if(num < 2)
+            return 0;
+        if(wave > PRIME_MAX_LIMIT)
+            wave = PRIME_MAX_LIMIT;
+        for(i = 0; i < wave; i++)
+        {
+            while(num % prime_numbers[i] == 0)
+                num /= prime_numbers[i];
+        }
+
+        /* If we aren't left with 1, the number is invalid: */
+        if(num == 1)
+            return 1;
+        else
+            return 0;
+    }
 }
 
 //implementation of the powerbomb powerup

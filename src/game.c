@@ -64,3 +64,16 @@ int pause_game(void)
 
     return (pause_quit);
 }
+
+void StartNewQuestion() {
+    char question[50];
+    char answer[20];
+
+    if (rand() % 2 == 0) { // 50% chance to generate a fraction question
+        GenerateFractionQuestion(question, answer);
+    } else {
+        // ...existing logic for generating other types of questions...
+    }
+
+    // ...existing code to display the question and store the answer...
+}

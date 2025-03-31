@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h> // For isdigit()
 
 #include "globals.h"
 #include "options.h"
@@ -58,6 +59,62 @@ void initialize_scores(void)
 {
     /* This is a stub to let things compile */
 }  
+
+// Function to parse fractional answers
+int parse_fraction(const char* input, double* result) {
+    char* slash_pos = strchr(input, '/');
+    if (slash_pos) {
+        int numerator = atoi(input);
+        int denominator = atoi(slash_pos + 1);
+        if (denominator == 0) {
+            fprintf(stderr, "Error: Division by zero in fraction %s\n", input);
+            return 0;
+        }
+        *result = (double)numerator / denominator;
+        return 1;
+    }
+    return 0; // Not a fraction
+}
+
+// Modify MC_PrintQuestionList to display fractional questions
+void MC_PrintQuestionList(MC_MathGame* game, FILE* output) {
+    for (int i = 0; i < game->num_questions; i++) {
+        if (game->questions[i].is_fraction) {
+            fprintf(output, "Question %d: %d/%d\n", i + 1, 
+                    game->questions[i].numerator, 
+                    game->questions[i].denominator);
+        } else {
+            // ...existing code for non-fractional questions...
+        }
+    }
+}
+
+// Modify MC_StartGame to generate fractional questions
+void MC_StartGame(MC_MathGame* game) {
+    for (int i = 0; i < game->num_questions; i++) {
+        if (rand() % 2 == 0) { // Randomly decide if the question is fractional
+            game->questions[i].is_fraction = 1;
+            game->questions[i].numerator = rand() % 10 + 1;
+            game->questions[i].denominator = rand() % 10 + 1;
+        } else {
+            // ...existing code for non-fractional questions...
+        }
+    }
+}
+
+// Modify answer validation to support fractions
+int validate_answer(const char* input, MC_Question* question) {
+    double answer;
+    if (question->is_fraction) {
+        if (!parse_fraction(input, &answer)) {
+            fprintf(stderr, "Invalid fractional answer: %s\n", input);
+            return 0;
+        }
+        return fabs(answer - ((double)question->numerator / question->denominator)) < 1e-6;
+    } else {
+        // ...existing code for non-fractional answers...
+    }
+}
 
 int main(int argc,char *argv[])
 {

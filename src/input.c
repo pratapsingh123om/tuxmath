@@ -110,13 +110,14 @@ void          ShowMessage(int font_size, const char* str1, const char* str2, con
 void          ShowMessageWrap( int font_size, const char* str );
 SDL_Surface*  current_bkg(); //appropriate background for current video mode
 
-/* Function prototype for generating fractional questions */
-void GenerateFractionQuestion(char* question, char* answer);
 
 /* in audio.c  (from tuxtype): */
 void          playsound(int snd);
 void          audioMusicLoad(char* musicFilename, int repeatQty);
 void          audioMusicUnload(void);
 void          audioMusicPlay(Mix_Music* musicData, int repeatQty);
+
+/* in input.c */
+void handle_input(char* input);
 
 #endif //TITLESCREEN_H

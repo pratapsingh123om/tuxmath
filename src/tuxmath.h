@@ -68,6 +68,8 @@ extern int flipped_img_lookup[];
 
 extern int glyph_offset;
 
+/* Enable fractional questions */
+extern int enable_fractions; // New global flag to enable/disable fractional questions
 
 #ifndef NOSOUND
 extern Mix_Chunk* sounds[];    /* declared in setup.c; also used in fileops.c, playsound.c */

@@ -2,7 +2,7 @@
 
    implementation of backend for a flashcard-type math game.
 
-   Copyright 2005, 2008, 2009, 2010, 2011.
+   Copyright 5, 2008, 2009, 2010, 2011.
 Authors:  David Bruce, Tim Holy, Brendan Luchen, "Povik".
 Project email: <tuxmath-devel@lists.sourceforge.net>
 Project website: http://tux4kids.alioth.debian.org
@@ -248,9 +248,96 @@ static int calc_score(int difficulty, float t);
 //Create formula_string in i18n-friendly fashion:
 static int create_formula_str(char* form_str, int n1, int n2, int op, int format);
 
+/* Generate a fractional question and answer */
+int MC_GenerateFractionQuestion(MC_FlashCard* card) {
+    if (!card) return 0;
 
+    // Generate random numerator and denominator
+    card->numerator = rand() % 10 + 1; // Random numerator between 1 and 10
+    card->denominator = rand() % 10 + 1; // Random denominator between 1 and 10
 
+    // Ensure denominator is not zero
+    if (card->denominator == 0) card->denominator = 1;
 
+    // Set operation type to fraction
+    card->operation = MC_OPER_FRACTION;
+
+    // Format the question as "numerator / denominator = ?"
+    snprintf(card->formula_string, sizeof(card->formula_string), "%d / %d = ?", card->numerator, card->denominator);
+
+    // Calculate the answer as a float
+    card->answer = (float)card->numerator / card->denominator;
+
+    return 1; // Success
+}
+
+/* Reorganize formula_string and answer_string to render the same equation in a different format */
+void reformat_arithmetic(MC_FlashCard* card, MC_Format f) {
+    if (!card) return;
+
+    if (card->operation == MC_OPER_FRACTION) {
+        // Handle fraction-specific reformatting
+        switch (f) {
+            case MC_FORMAT_ANS_LAST:
+                snprintf(card->formula_string, sizeof(card->formula_string), "%d / %d = ?", card->numerator, card->denominator);
+                break;
+            case MC_FORMAT_ANS_FIRST:
+                snprintf(card->formula_string, sizeof(card->formula_string), "? / %d = %.2f", card->denominator, card->answer);
+                break;
+            case MC_FORMAT_ANS_MIDDLE:
+                snprintf(card->formula_string, sizeof(card->formula_string), "%d / ? = %.2f", card->numerator, card->answer);
+                break;
+            default:
+                break;
+        }
+    } else {
+        // ...existing code for other operations...
+        int i, j;
+        char* beg = 0;
+        char* end = 0;
+        char nans[MC_ANSWER_LEN];
+        char nformula[MC_FORMULA_LEN + MC_ANSWER_LEN + 1]; //gets a bit larger than usual in the meantime
+
+        {
+            DEBUGMSG(debug_mathcards, "Starting formula: %s\n", card->formula_string);
+            //insert old answer where question mark was
+            for (i = 0, j = 0; card->formula_string[j] != '?'; ++i, ++j)
+                nformula[i] = card->formula_string[j];
+            i += snprintf(nformula + i, MC_ANSWER_LEN, "%s", card->answer_string);
+            DEBUGMSG(debug_mathcards, "interim formula: %s\n", nformula);
+            snprintf(nformula + i, MC_FORMULA_LEN - i, "%s", card->formula_string + j + 1);
+
+            //replace the new answer with a question mark
+            if (f == MC_FORMAT_ANS_LAST)
+                beg = strrchr(nformula, ' ') + 1;
+            if (f == MC_FORMAT_ANS_FIRST)
+                beg = nformula;
+            if (f == MC_FORMAT_ANS_MIDDLE)
+                beg = strchr(nformula, ' ') + 3;
+            end = strchr(beg + 1, ' ');
+            if (!end)
+                end = "";
+
+            //we now have beg = first digit of number to replace, end = the char after
+            sscanf(beg, "%s", nans);
+            *beg = 0; //sequester the first half of the string
+            snprintf(card->formula_string, MC_FORMULA_LEN, "%s?%s", nformula, end);
+            DEBUGMSG(debug_mathcards, "New formula: %s\n", card->formula_string);
+            snprintf(card->answer_string, MC_ANSWER_LEN, "%s", nans);
+            card->answer = atoi(card->answer_string);
+        }
+    }
+}
+
+/* Update input validation to support forward-slash in answers */
+int validate_fraction_answer(const char* input, MC_FlashCard* card) {
+    int num, denom;
+    if (sscanf(input, "%d / %d", &num, &denom) == 2) {
+        if (denom == 0) return 0; // Invalid if denominator is zero
+        return (num == card->numerator && denom == card->denominator);
+    }
+    return 0;
+}
 
 /*  MC_Initialize() sets up the struct containing all of  */
 /*  settings regarding math questions.  It should be      */
@@ -1274,7 +1361,7 @@ void print_counters(MC_MathGame *game)
 //   if (!node)
 //     return DEFAULT_CARD;
 //   fc = MC_AllocateFlashcard();
-//   copy_card(&(node->card), &fc);
+//   copy_card(&(node->card), &(fc->card) );
 //   return fc;
 // }
 
