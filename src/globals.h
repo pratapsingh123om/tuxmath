@@ -31,35 +31,43 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-// Translation stuff (now works for Mac and Win too!): 
-#include "config.h"
-#include "gettext.h"
+// System includes
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <wchar.h>
 #include <locale.h>
-#define _(String) gettext (String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
+
+// SDL includes
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
+
+// Project includes
+#include "config.h"
+#include "t4k_common.h"
+#include "mathcards.h"
+
+// Translation setup
+#ifdef ENABLE_NLS
+  #include <libintl.h>
+  #define _(String) gettext(String)
+  #define N_(String) gettext_noop(String)
+#else
+  #define _(String) (String)
+  #define N_(String) String
+  #define textdomain(Domain)
+  #define bindtextdomain(Package, Directory)
+#endif
 
 #ifdef WIN32
-#define TUXLOCALE "./locale"
+  #define TUXLOCALE "./locale"
 #else
-#define TUXLOCALE LOCALEDIR
-#endif
-
-#include <wchar.h>
-
-#include <t4k_common.h>
-/* Conditional includes of t4k_common replacement functions
- * if not supplied by platform:
- */
-/* Somehow, configure defines HAVE_ALPHASORT and
- * HAVE_SCANDIR for mingw32 even though they are 
- * not available for that build, so use our own:
- */
-#if !defined HAVE_ALPHASORT || defined BUILD_MINGW32
-#include <t4k_alphasort.h>
-#endif
-#if !defined HAVE_SCANDIR || defined BUILD_MINGW32
-#include <t4k_scandir.h>
+  #define TUXLOCALE LOCALEDIR
 #endif
 
 /* debug data (now declared in libt4k_common */

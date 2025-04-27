@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/tuxmathadmin.dir/link.d CMakeFiles/tuxmathadmin.dir/tuxmathadmin.c.o -o tuxmathadmin  ../t4kcommon/libt4k_common.a /usr/lib/x86_64-linux-gnu/libSDL2main.a /usr/lib/x86_64-linux-gnu/libSDL2.so /usr/lib/x86_64-linux-gnu/libSDL2_image.so /usr/lib/x86_64-linux-gnu/libSDL2_mixer.so /usr/lib/x86_64-linux-gnu/libSDL2_ttf.so -lm

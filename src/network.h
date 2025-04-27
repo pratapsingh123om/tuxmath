@@ -34,20 +34,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define NETWORK_H
 
 #include "config.h"
+#include <SDL2/SDL.h>
+
+#define NAME_SIZE 16
 
 #ifdef HAVE_LIBSDL_NET
 
 #include "transtruct.h"
 #include "SDL_net.h"
 
-
-typedef struct {
-    IPaddress ip;            /* 32-bit IPv4 host address */
-    char name[NAME_SIZE];
-    char lesson[LESSON_TITLE_LENGTH];
-}ServerEntry;
-
-/* Keep information on other connected players for on-screen display: */
 typedef struct lan_player_type {
     bool connected;
     char name[NAME_SIZE];
@@ -56,36 +51,31 @@ typedef struct lan_player_type {
     int score;  
 } lan_player_type;
 
-/* Networking setup and cleanup: */
+// Function declarations
 int LAN_DetectServers(void);
 int LAN_AutoSetup(int i);
-char* LAN_ServerName(int i);
-char* LAN_ConnectedServerName(void);
-char* LAN_ConnectedServerLesson(void);
+const char* LAN_ServerName(int i);
+const char* LAN_ConnectedServerName(void);
+const char* LAN_ConnectedServerLesson(void);
 void print_server_list(void);
-
 void LAN_Cleanup(void);
 int LAN_SetName(char* name);
 int LAN_SetReady(bool ready);
 int LAN_RequestIndex(void);
-/* Network replacement functions for mathcards "API": */
-/* These functions are how the client tells things to the server: */
 int LAN_AnsweredCorrectly(int id, float t);
 int LAN_NotAnsweredCorrectly(int id);
 int LAN_LeaveGame(void);
-/* These functions return info about currently connected players */
 int LAN_NumPlayers(void);
-char* LAN_PlayerName(int i);
+const char* LAN_PlayerName(int i);
 bool LAN_PlayerMine(int i);
 bool LAN_PlayerReady(int i);
 bool LAN_PlayerConnected(int i);
 int LAN_PlayerScore(int i);
 int LAN_MyIndex(void);
-/* This is how the client receives messages from the server: */
 int LAN_NextMsg(char* buf);
 
-
-
+// Comparison function for sorting players
+int compare_scores(const void* a, const void* b);
 
 #endif // HAVE_LIBSDL_NET
 

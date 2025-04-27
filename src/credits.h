@@ -30,8 +30,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef CREDITS_H
 #define CREDITS_H
 
+#include <SDL2/SDL.h>
+#include "common.h"
 
+// Function declarations
 int credits(void);
-int scroll_text(char text[MAX_LINES][MAX_LINEWIDTH], SDL_Rect subscreen, int speed);
+int scroll_text(char (*text)[MAX_LINEWIDTH], SDL_Rect subscreen, int speed);
 void draw_text(char* str, SDL_Rect dest);
-#endif
+
+#endif /* CREDITS_H */

@@ -1,0 +1,22 @@
+diff --git a/src/comets.c b/src/comets.c
+--- a/src/comets.c
++++ b/src/comets.c
+@@ -646,7 +646,7 @@ static void comets_initialize(void)
+     T4K_OnResolutionSwitch(comets_recalc_positions);
+ }
+ 
+-static void comets_recalc_positions(int xres, int yres)
++static void comets_recalc_positions(void)
+ {
+     int i;
+     float scale_x = (float)screen->w / (float)orig_w;
+@@ -3070,7 +3070,7 @@ static void comets_key_event(SDL_KeyboardEvent* key_event)
+         comets_handle_answer(key - SDLK_0);
+     }
+     /* Handle keypad input: */
+-    else if (key >= SDLK_KP0 && key <= SDLK_KP9)
++    else if (key >= SDLK_KP_0 && key <= SDLK_KP_9)
+     {
+         comets_handle_answer(key - SDLK_KP0);
+     }
+ } 

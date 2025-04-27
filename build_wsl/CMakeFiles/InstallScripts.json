@@ -1,0 +1,11 @@
+{
+	"InstallScripts" : 
+	[
+		"/mnt/c/Users/gajen/tuxmath/build_wsl/cmake_install.cmake",
+		"/mnt/c/Users/gajen/tuxmath/build_wsl/t4kcommon/cmake_install.cmake",
+		"/mnt/c/Users/gajen/tuxmath/build_wsl/src/cmake_install.cmake",
+		"/mnt/c/Users/gajen/tuxmath/build_wsl/data/cmake_install.cmake",
+		"/mnt/c/Users/gajen/tuxmath/build_wsl/doc/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

@@ -18,6 +18,7 @@ Copyright: See COPYING file that comes with this distribution (briefly, GNU GPL 
 #define MATHCARDS_H
 
 #include "transtruct.h"
+#include "t4k_common.h"
 
 
 /* different classes of problems TuxMath will ask */
@@ -37,6 +38,23 @@ typedef enum _MC_Operation {
     MC_OPER_FRACTION, // New operation for fractions
     MC_NUM_OPERS
 } MC_Operation;
+
+/* type of fraction operation */
+typedef enum _FractionOperation {
+    FRACT_ADD,
+    FRACT_SUB,
+    FRACT_MULT,
+    FRACT_DIV,
+    FRACT_COMPARE,
+    FRACT_SIMPLIFY,
+    NUM_FRACT_OPERATIONS
+} FractionOperation;
+
+/* struct for representing fractions */
+typedef struct _Fraction {
+    int numerator;
+    int denominator;
+} Fraction;
 
 /* math question formats: */
 typedef enum _MC_Format {
@@ -302,10 +320,18 @@ int MC_MakeFlashcard(char* buf, MC_FlashCard* fc);
 void reformat_arithmetic(MC_FlashCard* card, MC_Format f);
 
 /* Generate a fractional question and answer */
-int MC_GenerateFractionQuestion(MC_FlashCard* card);
+int MC_GenerateFractionQuestion(MC_FlashCard* card, FractionOperation op);
 
 /* Function to generate fractional questions */
 void generate_fraction_question(MC_MathGame* game);
+
+/* Function declarations for fraction operations */
+Fraction MC_SimplifyFraction(Fraction f);
+Fraction MC_AddFractions(Fraction f1, Fraction f2);
+Fraction MC_SubtractFractions(Fraction f1, Fraction f2);
+Fraction MC_MultiplyFractions(Fraction f1, Fraction f2);
+Fraction MC_DivideFractions(Fraction f1, Fraction f2);
+int MC_CompareFractions(Fraction f1, Fraction f2);
 
 #endif
 

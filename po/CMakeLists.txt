@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.5)
+
 # The following lists the translations that require SDL_Pango to
 # display properly; if we don't have SDL_Pango support, the text is
 # blank, which is worse than displaying the English. So if we don't

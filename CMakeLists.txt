@@ -11,20 +11,108 @@
 # programs, and functions.  The Autotools build is the basis
 # for official releases and is more consistently maintained.
 
-project(TuxMath)
+cmake_minimum_required(VERSION 3.10)
 
+# Enable new project version behavior
+cmake_policy(SET CMP0048 NEW)
+
+project(tuxmath)
+
+# Add modern CMake features
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_STANDARD 11)
+
+# Enable verbose output for debugging
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+# Set module path for finding packages
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules" ${CMAKE_MODULE_PATH})
+
+message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+
+# Find required packages
+find_package(SDL2 REQUIRED)
+message(STATUS "SDL2_FOUND: ${SDL2_FOUND}")
+message(STATUS "SDL2_INCLUDE_DIRS: ${SDL2_INCLUDE_DIRS}")
+message(STATUS "SDL2_LIBRARIES: ${SDL2_LIBRARIES}")
+
+find_package(SDL2_image REQUIRED)
+message(STATUS "SDL2_IMAGE_FOUND: ${SDL2_image_FOUND}")
+message(STATUS "SDL2_IMAGE_INCLUDE_DIRS: ${SDL2_IMAGE_INCLUDE_DIRS}")
+message(STATUS "SDL2_IMAGE_LIBRARIES: ${SDL2_IMAGE_LIBRARIES}")
+
+find_package(SDL2_mixer REQUIRED)
+message(STATUS "SDL2_MIXER_FOUND: ${SDL2_mixer_FOUND}")
+message(STATUS "SDL2_MIXER_INCLUDE_DIRS: ${SDL2_MIXER_INCLUDE_DIRS}")
+message(STATUS "SDL2_MIXER_LIBRARIES: ${SDL2_MIXER_LIBRARIES}")
+
+find_package(SDL2_ttf REQUIRED)
+message(STATUS "SDL2_TTF_FOUND: ${SDL2_ttf_FOUND}")
+message(STATUS "SDL2_TTF_INCLUDE_DIRS: ${SDL2_TTF_INCLUDE_DIRS}")
+message(STATUS "SDL2_TTF_LIBRARIES: ${SDL2_TTF_LIBRARIES}")
+
+# Include directories
+include_directories(
+    ${SDL2_INCLUDE_DIRS}
+    ${SDL2_IMAGE_INCLUDE_DIRS}
+    ${SDL2_MIXER_INCLUDE_DIRS}
+    ${SDL2_TTF_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/t4kcommon/src
+    ${CMAKE_SOURCE_DIR}/t4kcommon/src/linebreak
+)
+
+# Set installation paths
+set(CMAKE_INSTALL_PREFIX "/usr/local")
+set(DATADIR "${CMAKE_INSTALL_PREFIX}/share/tuxmath")
+
+# Options
+option(ENABLE_NLS "Enable Native Language Support" OFF)
+option(WITH_SDLPANGO "Build with SDL_Pango support" OFF)
+
+# Add t4k_common subdirectory
+add_subdirectory(t4kcommon)
+
+# Add source directory
+add_subdirectory(src)
+
+# Install data files
+install(DIRECTORY data/ DESTINATION share/tuxmath/data)
+install(DIRECTORY doc/ DESTINATION share/doc/tuxmath)
+install(FILES tuxmath.desktop DESTINATION share/applications)
+
+# Copy SDL2 DLLs to build directory
+if(WIN32)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        file(COPY 
+            "${CMAKE_SOURCE_DIR}/deps/SDL2-2.30.1/lib/x64/SDL2.dll"
+            "${CMAKE_SOURCE_DIR}/deps/SDL2_image-2.8.2/lib/x64/SDL2_image.dll"
+            "${CMAKE_SOURCE_DIR}/deps/SDL2_mixer-2.8.0/lib/x64/SDL2_mixer.dll"
+            "${CMAKE_SOURCE_DIR}/deps/SDL2_ttf-2.22.0/lib/x64/SDL2_ttf.dll"
+            DESTINATION ${CMAKE_BINARY_DIR}/src
+        )
+    else()
+        file(COPY 
+            "${CMAKE_SOURCE_DIR}/deps/SDL2-2.30.1/lib/x86/SDL2.dll"
+            "${CMAKE_SOURCE_DIR}/deps/SDL2_image-2.8.2/lib/x86/SDL2_image.dll"
+            "${CMAKE_SOURCE_DIR}/deps/SDL2_mixer-2.8.0/lib/x86/SDL2_mixer.dll"
+            "${CMAKE_SOURCE_DIR}/deps/SDL2_ttf-2.22.0/lib/x86/SDL2_ttf.dll"
+            DESTINATION ${CMAKE_BINARY_DIR}/src
+        )
+    endif()
+endif()
+
+set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
+
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
+set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
 
 set(TUXMATH_VERSION "2.0.4")
 set(TUXMATHADMIN_VERSION "0.1.1")
 message("Building TuxMath version ${TUXMATH_VERSION}")
 
 ## Setting up CMake itself
-cmake_minimum_required(VERSION 2.6)
-set(CMAKE_MODULE_PATH "${TuxMath_SOURCE_DIR}/cmake-modules")
-set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
-
-#message("CMP: ${CMAKE_MODULE_PATH}")
-
 include(T4K_Sugar)
 
 ## Choose a debug build set
@@ -150,7 +238,7 @@ if (TUXMATH_BUILD_INTL)
   set(PREFIX ${CMAKE_BINARY_DIR})
   add_subdirectory(intl)
 endif (TUXMATH_BUILD_INTL)
-add_subdirectory(src)
+# add_subdirectory(src)  # Already added above
 add_subdirectory(data)
 add_subdirectory(doc)
 if (ENABLE_NLS)
@@ -164,4 +252,10 @@ message("TMBD ${TuxMath_BINARY_DIR}")
 if (APPLE)
    add_subdirectory(macosx)
 endif (APPLE)
+
+# Configure header with installation paths
+configure_file(
+    "${CMAKE_SOURCE_DIR}/config.h.in"
+    "${CMAKE_BINARY_DIR}/config.h"
+)
 

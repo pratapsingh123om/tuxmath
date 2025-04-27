@@ -45,6 +45,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <stdbool.h>
 
 #include "SDL.h"
 #include "SDL_image.h"
@@ -119,4 +120,4 @@ void          audioMusicLoad(char* musicFilename, int repeatQty);
 void          audioMusicUnload(void);
 void          audioMusicPlay(Mix_Music* musicData, int repeatQty);
 
-#endif //TITLESCREEN_H
+#endif /* TITLESCREEN_H */

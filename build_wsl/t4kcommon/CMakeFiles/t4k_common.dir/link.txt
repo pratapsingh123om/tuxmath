@@ -1,0 +1,2 @@
+/usr/bin/ar qc libt4k_common.a CMakeFiles/t4k_common.dir/src/t4k_common.c.o CMakeFiles/t4k_common.dir/src/t4k_loaders.c.o CMakeFiles/t4k_common.dir/src/linebreak/linebreak.c.o
+/usr/bin/ranlib libt4k_common.a

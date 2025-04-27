@@ -1,9 +1,15 @@
 #ifndef COMETS_H
 #define COMETS_H
 
-#include <SDL_video.h>
-
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_video.h>
+#include "t4k_common.h"  // Added for color definitions
+#include "game.h"  // Added for game_message definition
 #include "mathcards.h"
+
+// Global color definitions
+extern SDL_Color white;
+extern SDL_Color yellow;
 
 #define MAX_COMETS 10
 #define NUM_CITIES 4   /* MUST BE AN EVEN NUMBER! */
@@ -68,14 +74,6 @@ typedef struct cloud_type {
     int snowflake_y[NUM_SNOWFLAKES];
     int snowflake_size[NUM_SNOWFLAKES];
 } cloud_type;
-
-#define GAME_MESSAGE_LENGTH 100
-
-typedef struct {
-    int x,y;
-    int alpha;
-    char message[GAME_MESSAGE_LENGTH];
-} game_message;
 
 /* City animation status types */
 enum {
@@ -150,10 +148,5 @@ typedef struct help_controls_type {
     int extra_life_is_blinking;
     int laser_enabled;
 } help_controls_type;
-
-
-int comets_game(MC_MathGame* loc_game);
-void game_set_start_message(const char*, const char*, const char*, const char*);
-
 
 #endif

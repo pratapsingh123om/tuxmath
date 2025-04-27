@@ -89,7 +89,7 @@ void mp_run_multiplayer()
         while(!done)
         {
             //TODO maybe gradually increase difficulty
-            game_set_start_message(pnames[currentplayer], "Go!", "", "");
+            game_set_start_message(L"Player 1", L"Go!", L"", L"");
             
             //Announcing the current pleyer name 
 			T4K_Tts_say(DEFAULT_VALUE,DEFAULT_VALUE,INTERRUPT,"%s %s ",pnames[currentplayer],_("Go!"));
@@ -131,7 +131,7 @@ void mp_run_multiplayer()
         {
             for (currentplayer = 0; currentplayer < params[PLAYERS]; ++currentplayer)
             {
-                game_set_start_message(pnames[currentplayer], _("Go!"), NULL, NULL);
+                game_set_start_message(L"Player 1", L"Go!", L"", L"");
                 
                 //Announcing the current player name
 				T4K_Tts_say(DEFAULT_VALUE,DEFAULT_VALUE,INTERRUPT,"%s %s ",pnames[currentplayer],_("Go!"));

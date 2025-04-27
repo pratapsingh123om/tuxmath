@@ -248,27 +248,129 @@ static int calc_score(int difficulty, float t);
 //Create formula_string in i18n-friendly fashion:
 static int create_formula_str(char* form_str, int n1, int n2, int op, int format);
 
-/* Generate a fractional question and answer */
-int MC_GenerateFractionQuestion(MC_FlashCard* card) {
+/* Helper function to find GCD for fraction simplification */
+static int gcd(int a, int b) {
+    if (b == 0)
+        return a;
+    return gcd(b, a % b);
+}
+
+/* Helper function to find LCM for fraction addition/subtraction */
+static int lcm(int a, int b) {
+    return (a * b) / gcd(a, b);
+}
+
+Fraction MC_SimplifyFraction(Fraction f) {
+    int divisor = gcd(abs(f.numerator), abs(f.denominator));
+    Fraction result = {
+        .numerator = f.numerator / divisor,
+        .denominator = f.denominator / divisor
+    };
+    // Ensure denominator is positive
+    if (result.denominator < 0) {
+        result.numerator = -result.numerator;
+        result.denominator = -result.denominator;
+    }
+    return result;
+}
+
+Fraction MC_AddFractions(Fraction f1, Fraction f2) {
+    int common_denom = lcm(f1.denominator, f2.denominator);
+    Fraction result = {
+        .numerator = f1.numerator * (common_denom / f1.denominator) +
+                     f2.numerator * (common_denom / f2.denominator),
+        .denominator = common_denom
+    };
+    return MC_SimplifyFraction(result);
+}
+
+Fraction MC_SubtractFractions(Fraction f1, Fraction f2) {
+    Fraction neg_f2 = {.numerator = -f2.numerator, .denominator = f2.denominator};
+    return MC_AddFractions(f1, neg_f2);
+}
+
+Fraction MC_MultiplyFractions(Fraction f1, Fraction f2) {
+    Fraction result = {
+        .numerator = f1.numerator * f2.numerator,
+        .denominator = f1.denominator * f2.denominator
+    };
+    return MC_SimplifyFraction(result);
+}
+
+Fraction MC_DivideFractions(Fraction f1, Fraction f2) {
+    Fraction reciprocal = {.numerator = f2.denominator, .denominator = f2.numerator};
+    return MC_MultiplyFractions(f1, reciprocal);
+}
+
+int MC_CompareFractions(Fraction f1, Fraction f2) {
+    int common_denom = lcm(f1.denominator, f2.denominator);
+    int num1 = f1.numerator * (common_denom / f1.denominator);
+    int num2 = f2.numerator * (common_denom / f2.denominator);
+    if (num1 < num2) return -1;
+    if (num1 > num2) return 1;
+    return 0;
+}
+
+int MC_GenerateFractionQuestion(MC_FlashCard* card, FractionOperation op) {
     if (!card) return 0;
 
-    // Generate random numerator and denominator
-    card->numerator = rand() % 10 + 1; // Random numerator between 1 and 10
-    card->denominator = rand() % 10 + 1; // Random denominator between 1 and 10
+    // Generate random fractions with denominators between 1 and 10
+    Fraction f1 = {
+        .numerator = rand() % 10 + 1,
+        .denominator = rand() % 9 + 2  // 2 to 10
+    };
+    Fraction f2 = {
+        .numerator = rand() % 10 + 1,
+        .denominator = rand() % 9 + 2  // 2 to 10
+    };
 
-    // Ensure denominator is not zero
-    if (card->denominator == 0) card->denominator = 1;
+    Fraction result;
+    char op_char;
 
-    // Set operation type to fraction
-    card->operation = MC_OPER_FRACTION;
+    switch (op) {
+        case FRAC_ADD:
+            result = MC_AddFractions(f1, f2);
+            op_char = '+';
+            break;
+        case FRAC_SUB:
+            result = MC_SubtractFractions(f1, f2);
+            op_char = '-';
+            break;
+        case FRAC_MULT:
+            result = MC_MultiplyFractions(f1, f2);
+            op_char = '*';
+            break;
+        case FRAC_DIV:
+            result = MC_DivideFractions(f1, f2);
+            op_char = '/';
+            break;
+        case FRAC_SIMPLIFY:
+            // For simplification, generate a more complex fraction
+            f1.numerator *= 2;
+            f1.denominator *= 2;
+            result = MC_SimplifyFraction(f1);
+            snprintf(card->formula_string, MC_FORMULA_LEN, "%d/%d = ?", 
+                    f1.numerator, f1.denominator);
+            snprintf(card->answer_string, MC_ANSWER_LEN, "%d/%d", 
+                    result.numerator, result.denominator);
+            return 1;
+        case FRAC_COMPARE:
+            snprintf(card->formula_string, MC_FORMULA_LEN, "%d/%d ? %d/%d", 
+                    f1.numerator, f1.denominator, f2.numerator, f2.denominator);
+            int comp = MC_CompareFractions(f1, f2);
+            snprintf(card->answer_string, MC_ANSWER_LEN, "%c", 
+                    comp < 0 ? '<' : (comp > 0 ? '>' : '='));
+            return 1;
+    }
 
-    // Format the question as "numerator / denominator = ?"
-    snprintf(card->formula_string, sizeof(card->formula_string), "%d / %d = ?", card->numerator, card->denominator);
+    // Format the question and answer for arithmetic operations
+    snprintf(card->formula_string, MC_FORMULA_LEN, "%d/%d %c %d/%d = ?", 
+            f1.numerator, f1.denominator, op_char, 
+            f2.numerator, f2.denominator);
+    snprintf(card->answer_string, MC_ANSWER_LEN, "%d/%d", 
+            result.numerator, result.denominator);
 
-    // Calculate the answer as a float
-    card->answer = (float)card->numerator / card->denominator;
-
-    return 1; // Success
+    return 1;
 }
 
 /* Reorganize formula_string and answer_string to render the same equation in a different format */

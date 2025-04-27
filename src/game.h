@@ -25,6 +25,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef GAME_H
 #define GAME_H
 
+#include <SDL2/SDL.h>
+#include <wchar.h>
+#include "t4k_common.h"
+#include "mathcards.h"
+
 enum {
     GAME_IN_PROGRESS,
     GAME_OVER_WON,
@@ -43,5 +48,16 @@ extern int user_quit_received;
 
 int pause_game(void);
 
+#define MAX_MESSAGE_SIZE 256
+
+typedef struct {
+    wchar_t message[MAX_MESSAGE_SIZE];
+    int x;
+    int y;
+} game_message;
+
+// Function declarations
+void game_set_start_message(const wchar_t* m1, const wchar_t* m2, const wchar_t* m3, const wchar_t* m4);
+int comets_game(MC_MathGame* game);
 
 #endif
